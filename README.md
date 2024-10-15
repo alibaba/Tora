@@ -40,6 +40,12 @@ Recent advancements in Diffusion Transformer (DiT) have demonstrated remarkable 
 
 ## 🎞️ Showcases
 
+https://github.com/user-attachments/assets/949d5e99-18c9-49d6-b669-9003ccd44bf1
+
+https://github.com/user-attachments/assets/7e7dbe87-a8ba-4710-afd0-9ef528ec329b
+
+https://github.com/user-attachments/assets/4026c23d-229d-45d7-b5be-6f3eb9e4fd50
+
 All videos are available in this [Link](https://cloudbook-public-daily.oss-cn-hangzhou.aliyuncs.com/Tora_t2v/showcases.zip)
 
 ## ✅ TODO List
