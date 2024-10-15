@@ -1,0 +1,11 @@
+torch
+deepspeed
+sentencepiece
+tensorboardX
+datasets
+transformers
+cpm_kernels
+einops
+boto3
+webdataset
+concurrent-log-handler
