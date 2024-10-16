@@ -28,15 +28,15 @@ Recent advancements in Diffusion Transformer (DiT) have demonstrated remarkable 
 
 ## 📑 Table of Contents
 
-- [Showcases](#🎞️-showcases)
-- [TODO List](#✅-todo-list)
-- [Installation](#🐍-installation)
-- [Model Weights](#📦-model-weights)
-- [Inference](#🔄-inference)
-- [Gradio Demo](#🖥️-gradio-demo)
-- [Acknowledgements](#🤝-acknowledgements)
-- [Our previous work](#📄-our-previous-work)
-- [Citation](#📚-citation)
+- [Showcases](#%EF%B8%8F-showcases)
+- [TODO List](#-todo-list)
+- [Installation](#-installation)
+- [Model Weights](#-model-weights)
+- [Inference](#-inference)
+- [Gradio Demo](#%EF%B8%8F-gradio-demo)
+- [Acknowledgements](#-acknowledgements)
+- [Our previous work](#-our-previous-work)
+- [Citation](#-citation)
 
 ## 🎞️ Showcases
 
