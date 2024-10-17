@@ -103,7 +103,9 @@ cd sat
 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True torchrun --standalone --nproc_per_node=$N_GPU sample_video.py --base configs/tora/model/cogvideox_5b_tora.yaml configs/tora/inference_sparse.yaml --load ckpts/tora/t2v --output-dir samples --point_path trajs/coaster.txt --input-file assets/text/t2v/examples.txt
 ```
 
-You can change the `--input-file` and `--point_path` to your own prompts and trajectory points files. Replace `$N_GPU` with the number of GPUs you want to use.
+You can change the `--input-file` and `--point_path` to your own prompts and trajectory points files. Please note that the trajectory is drawn on a 256x256 canvas.
+
+Replace `$N_GPU` with the number of GPUs you want to use.
 
 ### Recommendations for Text Prompts
 
