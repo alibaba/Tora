@@ -524,13 +524,11 @@ PROVIDED_TRAJS = {
     ],
 }
 
-
 PROVIDED_PROMPTS = {
-    "boy": "A small boy, head bowed and determination etched on his face, sprints through the torrential downpour as crackles and  rumbles in the distance. The relentless rain pounds the ground, creating a chaotic dance of water droplets that mirror the Dramatic sky's anger. In the far background, the silhouette of a cozy home beckons, a faint beacon of safety and warmth amidst the fierce weather. The scene is one of perseverance and the unyielding spirit of a child braving the elements.",
-    "artist": "A street artist, clad in a worn-out denim jacket and a colorful bandana, stands before a vast concrete wall in the heart, holding a can of spray paint, spray-painting a colorful bird on a mottled wall.",
     "ship": "A detailed wooden toy ship with intricately carved masts and sails is seen gliding smoothly over a plush, blue carpet that mimics the waves of the sea. The ship's hull is painted a rich brown, with tiny windows. The carpet, soft and textured, provides a perfect backdrop, resembling an oceanic expanse. Surrounding the ship are various other toys and children's items, hinting at a playful environment. The scene captures the innocence and imagination of childhood, with the toy ship's journey symbolizing endless adventures in a whimsical, indoor setting.",
-    "squirrel": "A squirrel gathering nuts.",
     "golden retriever": "A golden retriever, sporting sleek black sunglasses, with its lengthy fur flowing in the breeze, sprints playfully across a rooftop terrace, recently refreshed by a light rain. The scene unfolds from a distance, the dog's energetic bounds growing larger as it approaches the camera, its tail wagging with unrestrained joy, while droplets of water glisten on the concrete behind it. The overcast sky provides a dramatic backdrop, emphasizing the vibrant golden coat of the canine as it dashes towards the viewer.",
+    "rubber duck": "A cheerful rubber duck floats serenely in a bathtub filled with bubbles, the soft foam creating an inviting atmosphere. The bathroom setting is warm with bright tiles reflecting soft light. The camera captures playful angles, zeroing in on the duck's bright yellow color and big eyes. Sounds of water gently splashing and laughter fill the background, enhancing the joyous ambiance. This moment invites viewers to embrace nostalgia and childhood fun, evoking a sense of playfulness and relaxation.",
+    "squirrel": "A squirrel gathering nuts.",
 }
 
 
@@ -1113,11 +1111,10 @@ def main(args):
             with gr.Column():
                 gr.Markdown("---\n## Prompt Examples", show_label=False, visible=True)
                 with gr.Row():
-                    prompt_1 = gr.Button(value="boy", visible=True)
-                    prompt_2 = gr.Button(value="artist", visible=True)
-                    prompt_3 = gr.Button(value="ship", visible=True)
+                    prompt_1 = gr.Button(value="ship", visible=True)
+                    prompt_2 = gr.Button(value="rubber duck", visible=True)
+                    prompt_3 = gr.Button(value="golden retriever", visible=True)
                     prompt_4 = gr.Button(value="squirrel", visible=True)
-                    prompt_5 = gr.Button(value="golden retriever", visible=True)
 
         traj_1.click(fn=add_provided_traj, inputs=traj_1, outputs=traj_args)
         traj_2.click(fn=add_provided_traj, inputs=traj_2, outputs=traj_args)
@@ -1132,7 +1129,6 @@ def main(args):
         prompt_2.click(fn=add_provided_prompt, inputs=prompt_2, outputs=prompt)
         prompt_3.click(fn=add_provided_prompt, inputs=prompt_3, outputs=prompt)
         prompt_4.click(fn=add_provided_prompt, inputs=prompt_4, outputs=prompt)
-        prompt_5.click(fn=add_provided_prompt, inputs=prompt_5, outputs=prompt)
 
         traj_vis.click(
             fn=fn_vis_traj,
@@ -1176,7 +1172,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--base", type=str, default="configs/tora/model/cogvideox_5b_tora.yaml configs/tora/inference_sparse.yaml"
     )
-    parser.add_argument("--load", type=str, default="")
+    parser.add_argument("--load", type=str, default="ckpts/tora/t2v")
 
     args = parser.parse_args()
 
