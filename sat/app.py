@@ -764,7 +764,7 @@ def fn_vis_traj():
         gr.update(visible=vis_num_samples),
         gr.update(visible=vis_seed),
         gr.update(visible=vis_start),
-        gr.update(visible=vis_gen_video, value=None),
+        gr.update(visible=vis_gen_video),
     )
 
 
@@ -831,14 +831,12 @@ def scale_traj_list_to_256(traj_list, canvas_width, canvas_height):
 ###########################################
 
 import math
-from pathlib import Path
 from typing import List, Union
 
 from diffusion_video import SATVideoDiffusionEngine
-from einops import rearrange
+from einops import rearrange, repeat
 from omegaconf import ListConfig
 from PIL import Image, ImageDraw
-from pytorch_lightning import seed_everything
 from torchvision.io import write_video
 from torchvision.utils import flow_to_image
 
@@ -874,13 +872,45 @@ def get_unique_embedder_keys_from_conditioner(conditioner):
     return list({x.input_key for x in conditioner.embedders})
 
 
-def save_video_as_grid_and_mp4(video_batch: torch.Tensor, fps: int = 8, args=None, key=None):
+def draw_points(video, points):
+    """
+    Draw points onto video frames.
+
+    Parameters:
+        video (torch.tensor): Video tensor with shape [T, H, W, C], where T is the number of frames,
+                            H is the height, W is the width, and C is the number of channels.
+        points (list): Positions of points to be drawn as a tensor with shape [T, 2],
+                            each point contains x and y coordinates.
+
+    Returns:
+        torch.tensor: The video tensor after drawing points, maintaining the same shape [T, H, W, C].
+    """
+
+    T = video.shape[0]
+    device = video.device
+    dtype = video.dtype
+    video = video.cpu().numpy().copy()
+    traj = np.zeros(video.shape[-3:], dtype=np.uint8)  # [H, W, C]
+    for t in range(1, T):
+        cv2.line(traj, tuple(points[t - 1]), tuple(points[t]), (255, 1, 1), 2)
+    for t in range(T):
+        mask = traj[..., -1] > 0
+        mask = repeat(mask, "h w -> h w c", c=3)
+        alpha = 0.7
+        video[t][mask] = video[t][mask] * (1 - alpha) + traj[mask] * alpha
+        cv2.circle(video[t], tuple(points[t]), 3, (160, 230, 100), -1)
+    video = torch.from_numpy(video).to(device, dtype)
+    return video
+
+
+def save_video_as_grid_and_mp4(video_batch: torch.Tensor, fps: int = 8, args=None, key=None, traj_points=None):
     path = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
 
     vid = video_batch[0]
     x = rearrange(vid, "t c h w -> t h w c")
     x = x.mul(255).add(0.5).clamp(0, 255).to("cpu", torch.uint8)  # [T H W C]
 
+    # clean video
     write_video(
         path,
         x,
@@ -889,7 +919,21 @@ def save_video_as_grid_and_mp4(video_batch: torch.Tensor, fps: int = 8, args=Non
         options={"crf": "18"},
     )
 
-    return path
+    if traj_points is not None:
+        # traj video
+        x = draw_points(x, traj_points)
+        traj_path = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
+        write_video(
+            traj_path,
+            x,
+            fps=fps,
+            video_codec="libx264",
+            options={"crf": "18"},
+        )
+
+        return [path, traj_path]
+
+    return [path]
 
 
 def cold_start(args):
@@ -926,6 +970,7 @@ def model_run_v2(prompt, seed, n_samples=1):
 
     global traj_list
     global canvas_width, canvas_height
+    traj_list_range_video = traj_list.copy()
     traj_list_range_256 = scale_traj_list_to_256(traj_list, canvas_width, canvas_height)
 
     with torch.no_grad():
@@ -1015,17 +1060,18 @@ def model_run_v2(prompt, seed, n_samples=1):
             samples_x = recon.permute(0, 2, 1, 3, 4).contiguous()
             samples = torch.clamp((samples_x + 1.0) / 2.0, min=0.0, max=1.0).cpu()
             # [b, f, c, h, w]
-            file_path = save_video_as_grid_and_mp4(
+            file_path_list = save_video_as_grid_and_mp4(
                 samples,
                 fps=sampling_fps,
+                traj_points=process_points(traj_list_range_video),  # interpolate to 49 points
             )
-            print(file_path)
+            print(file_path_list)
 
         del samples_z, samples_x, samples, video_flow, latent, recon, recons, c, uc, batch, batch_uc
         gc.collect()
         torch.cuda.empty_cache()
 
-        return gr.update(value=file_path, height=image_size[0], width=image_size[1])
+        return gr.update(value=file_path_list, height=image_size[0], min_width=image_size[1])
 
 
 def main(args):
@@ -1091,7 +1137,7 @@ def main(args):
                     seed = gr.Number(value=1234, precision=0, interactive=True, label="Seed", visible=True)
                     start = gr.Button(value="Generate", visible=True)
                 with gr.Column():
-                    gen_video = gr.Video(value=None, label="Generate Video", visible=True)
+                    gen_video = gr.Gallery(value=None, label="Generate Video", visible=True)
 
             # traj examples
             with gr.Column():
