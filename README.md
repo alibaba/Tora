@@ -92,7 +92,7 @@ sat
 ### Download Links
 
 - Download the VAE and T5 model following [CogVideo](https://github.com/THUDM/CogVideo/blob/main/sat/README.md#2-download-model-weights)
-- Tora t2v model weights: [Link](https://cloudbook-public-daily.oss-cn-hangzhou.aliyuncs.com/Tora_t2v/mp_rank_00_model_states.pt)
+- Downloading this weight requires following the [CogVideoX License](CogVideoX_LICENSE),Tora t2v model weights: [Link](https://cloudbook-public-daily.oss-cn-hangzhou.aliyuncs.com/Tora_t2v/mp_rank_00_model_states.pt)
 
 ## 🔄 Inference
 
