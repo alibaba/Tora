@@ -11,6 +11,7 @@ Zhenghao Zhang\*, Junchao Liao\*, Menghao Li, Zuozhuo Dai, Bingxue Qiu, Siyu Zhu
 <a href='https://arxiv.org/abs/2407.21705'><img src='https://img.shields.io/badge/ArXiv-2407.21705-red'></a>
 <a href='https://ali-videoai.github.io/tora_video/'><img src='https://img.shields.io/badge/Project-Page-Blue'></a> ![views](https://visitor-badge.laobi.icu/badge?page_id=alibaba.Tora&left_color=gray&right_color=green)
 <a href="git clone https://github.com/alibaba/Tora/stargazers"><img src="https://img.shields.io/github/stars/alibaba/Tora?style=social"></a>
+<a href='https://www.modelscope.cn/studios/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖%20ModelScope-demo-blue'></a>
 
 </div>
 
@@ -22,6 +23,8 @@ Recent advancements in Diffusion Transformer (DiT) have demonstrated remarkable 
 
 ## 📣 Updates
 
+- `2024/10/23` 🔥🔥Our [ModelScope Demo](https://www.modelscope.cn/studios/xiaoche/Tora) is launched. Welcome to try it out! We also upload the model weights to [ModelScope](https://www.modelscope.cn/models/xiaoche/Tora).
+- `2024/10/21` Thanks to [@kijai](https://github.com/kijai) for supporting Tora in ComfyUI! [Link](https://github.com/kijai/ComfyUI-CogVideoXWrapper)
 - `2024/10/15` 🔥🔥We released our inference code and model weights. **Please note that this is a CogVideoX version of Tora, built on the CogVideoX-5B model. This version of Tora is meant for academic research purposes only. Due to our commercial plans, we will not be open-sourcing the complete version of Tora at this time.**
 - `2024/08/27` We released our v2 paper including appendix.
 - `2024/07/31` We submitted our paper on arXiv and released our project page.
@@ -34,6 +37,7 @@ Recent advancements in Diffusion Transformer (DiT) have demonstrated remarkable 
 - [Model Weights](#-model-weights)
 - [Inference](#-inference)
 - [Gradio Demo](#%EF%B8%8F-gradio-demo)
+- [Troubleshooting](#-troubleshooting)
 - [Acknowledgements](#-acknowledgements)
 - [Our previous work](#-our-previous-work)
 - [Citation](#-citation)
@@ -51,7 +55,7 @@ All videos are available in this [Link](https://cloudbook-public-daily.oss-cn-ha
 ## ✅ TODO List
 
 - [x] Release our inference code and model weights
-- [ ] Provide a ModelScope Demo
+- [x] Provide a ModelScope Demo
 - [ ] Release our training code
 - [ ] Release complete version of Tora
 
@@ -130,6 +134,12 @@ Usage:
 cd sat
 python app.py --load ckpts/tora/t2v
 ```
+
+## 🎯 Troubleshooting
+
+### 1. ValueError: Non-consecutive added token...
+
+Upgrade the transformers package to 4.44.2. See [this](https://github.com/THUDM/CogVideo/issues/213) issue.
 
 ## 🤝 Acknowledgements
 
