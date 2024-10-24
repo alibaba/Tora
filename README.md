@@ -9,9 +9,10 @@ Zhenghao Zhang\*, Junchao Liao\*, Menghao Li, Zuozhuo Dai, Bingxue Qiu, Siyu Zhu
 \* equal contribution
 
 <a href='https://arxiv.org/abs/2407.21705'><img src='https://img.shields.io/badge/ArXiv-2407.21705-red'></a>
-<a href='https://ali-videoai.github.io/tora_video/'><img src='https://img.shields.io/badge/Project-Page-Blue'></a> ![views](https://visitor-badge.laobi.icu/badge?page_id=alibaba.Tora&left_color=gray&right_color=green)
-<a href="git clone https://github.com/alibaba/Tora/stargazers"><img src="https://img.shields.io/github/stars/alibaba/Tora?style=social"></a>
+<a href='https://ali-videoai.github.io/tora_video/'><img src='https://img.shields.io/badge/Project-Page-Blue'></a>
+<a href="https://github.com/alibaba/Tora"><img src='https://img.shields.io/badge/Github-Link-orange'></a>
 <a href='https://www.modelscope.cn/studios/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖%20ModelScope-demo-blue'></a>
+<a href='https://modelscope.cn/models/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖%20ModelScope-weights-blue'></a>
 
 </div>
 
