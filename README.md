@@ -102,7 +102,7 @@ Tora
 
 - Download the VAE and T5 model following [CogVideo](https://github.com/THUDM/CogVideo/blob/main/sat/README.md#2-download-model-weights):
     - VAE: https://cloud.tsinghua.edu.cn/f/fdba7608a49c463ba754/?dl=1
-    - T5: https://huggingface.co/THUDM/CogVideoX-2b/tree/main/text_encoder
+    - T5: [text_encoder](https://huggingface.co/THUDM/CogVideoX-2b/tree/main/text_encoder), [tokenizer](https://huggingface.co/THUDM/CogVideoX-2b/tree/main/tokenizer)
 - Tora t2v model weights: [Link](https://cloudbook-public-daily.oss-cn-hangzhou.aliyuncs.com/Tora_t2v/mp_rank_00_model_states.pt). Downloading this weight requires following the [CogVideoX License](CogVideoX_LICENSE).
 
 ## 🔄 Inference
