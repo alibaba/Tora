@@ -4,6 +4,8 @@ import argparse
 import gc
 import os
 import tempfile
+import threading
+import time
 
 import cv2
 import gradio as gr
@@ -12,9 +14,11 @@ import numpy as np
 import torch
 
 
+tempfile_dir = "/tmp/Tora"
+os.makedirs(tempfile_dir, exist_ok=True)
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 SPACE_ID = os.environ.get("SPACE_ID", "")
-
+os.system("modelscope download --model=xiaoche/Tora --local_dir ./ckpts")
 
 #### Description ####
 title = r"""<h1 align="center">Tora: Trajectory-oriented Diffusion Transformer for Video Generation</h1>"""
@@ -63,7 +67,7 @@ canvas_width, canvas_height = 256, 256
 # Note that the coordinates passed to the model must not exceed 256.
 # xy range 256
 PROVIDED_TRAJS = {
-    "circle1": [
+    "circle": [
         [120, 194],
         [144, 193],
         [155, 189],
@@ -87,7 +91,7 @@ PROVIDED_TRAJS = {
         [112, 194],
         [118, 195],
     ],
-    "circle2": [
+    "spiral": [
         [100, 127],
         [105, 117],
         [122, 117],
@@ -492,7 +496,7 @@ PROVIDED_TRAJS = {
         [147, 89],
         [147, 89],
     ],
-    "spiral": [
+    "wave": [
         [16, 152],
         [23, 138],
         [39, 122],
@@ -524,8 +528,9 @@ PROVIDED_TRAJS = {
     ],
 }
 
+
 PROVIDED_PROMPTS = {
-    "ship": "A detailed wooden toy ship with intricately carved masts and sails is seen gliding smoothly over a plush, blue carpet that mimics the waves of the sea. The ship's hull is painted a rich brown, with tiny windows. The carpet, soft and textured, provides a perfect backdrop, resembling an oceanic expanse. Surrounding the ship are various other toys and children's items, hinting at a playful environment. The scene captures the innocence and imagination of childhood, with the toy ship's journey symbolizing endless adventures in a whimsical, indoor setting.",
+    "dandelion": "A dandelion puff sways gently in the wind, its seeds ready to take flight and spread into the world. The animation style highlights the delicate fibers of the puff, with soft, glowing light surrounding it. The background showcases a lush, green field, hinting at the beauty of nature. As the wind blows, the seeds dance and float away, creating an enchanting visual narrative. The gentle sounds of nature, alongside soft whispers of the breeze, enrich the overall ambiance. This serene scene invites viewers to embrace the moment of letting go, celebrating the cycle of life and new beginnings.",
     "golden retriever": "A golden retriever, sporting sleek black sunglasses, with its lengthy fur flowing in the breeze, sprints playfully across a rooftop terrace, recently refreshed by a light rain. The scene unfolds from a distance, the dog's energetic bounds growing larger as it approaches the camera, its tail wagging with unrestrained joy, while droplets of water glisten on the concrete behind it. The overcast sky provides a dramatic backdrop, emphasizing the vibrant golden coat of the canine as it dashes towards the viewer.",
     "rubber duck": "A cheerful rubber duck floats serenely in a bathtub filled with bubbles, the soft foam creating an inviting atmosphere. The bathroom setting is warm with bright tiles reflecting soft light. The camera captures playful angles, zeroing in on the duck's bright yellow color and big eyes. Sounds of water gently splashing and laughter fill the background, enhancing the joyous ambiance. This moment invites viewers to embrace nostalgia and childhood fun, evoking a sense of playfulness and relaxation.",
     "squirrel": "A squirrel gathering nuts.",
@@ -724,8 +729,18 @@ def process_traj(trajs_list, num_frames, video_size, device="cpu"):
     return optical_flow, processed_points
 
 
-def fn_vis_traj():
-    global traj_list
+def fn_vis_realtime_traj(traj_list):
+    points = process_points(traj_list)
+    img = np.ones((canvas_height, canvas_width, 3), dtype=np.uint8) * 255
+    for i in range(len(points) - 1):
+        p = points[i]
+        p1 = points[i + 1]
+        cv2.line(img, p, p1, (255, 0, 0), 2)
+    return img
+
+
+def fn_vis_traj(traj_list):
+    # global traj_list
     points = process_points(traj_list)
     imgs = []
     for idx in range(len(points)):
@@ -744,28 +759,15 @@ def fn_vis_traj():
         imgs.append(bg_img.astype(np.uint8))
 
     fps = 8
-    path = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
+    with tempfile.NamedTemporaryFile(dir=tempfile_dir, suffix=".mp4", delete=False) as f:
+        path = f.name
     writer = imageio.get_writer(path, format="mp4", mode="I", fps=fps)
     for img in imgs:
         writer.append_data(img)
 
     writer.close()
 
-    vis_step3_prompt_generate = True
-    vis_prompt = True
-    vis_num_samples = False
-    vis_seed = True
-    vis_start = True
-    vis_gen_video = True
-    return (
-        path,
-        gr.update(visible=vis_step3_prompt_generate),
-        gr.update(visible=vis_prompt),
-        gr.update(visible=vis_num_samples),
-        gr.update(visible=vis_seed),
-        gr.update(visible=vis_start),
-        gr.update(visible=vis_gen_video),
-    )
+    return path
 
 
 def create_grid_image(width, height, grid_size):
@@ -781,11 +783,12 @@ def create_grid_image(width, height, grid_size):
     return img
 
 
-def add_provided_traj(traj_name):
-    global traj_list
-    traj_list = PROVIDED_TRAJS[traj_name]
+def add_provided_traj(traj_list, traj_name):
+    traj_list.clear()
+    traj_list += PROVIDED_TRAJS[traj_name]
     traj_str = [f"{traj}" for traj in traj_list]
-    return ", ".join(traj_str)
+    img = fn_vis_realtime_traj(traj_list)
+    return img, ", ".join(traj_str), gr.update(visible=True)
 
 
 def add_provided_prompt(prompt_name):
@@ -793,32 +796,45 @@ def add_provided_prompt(prompt_name):
 
 
 def add_traj_point(
+    traj_list,
     evt: gr.SelectData,
 ):
-    global traj_list
+    # global traj_list
     traj_list.append(evt.index)
     traj_list[-1][0], traj_list[-1][1] = int(traj_list[-1][0]), int(traj_list[-1][1])
+    img = fn_vis_realtime_traj(traj_list)
     traj_str = [f"{traj}" for traj in traj_list]
-    return ", ".join(traj_str)
+    return img, ", ".join(traj_str)
 
 
-def fn_traj_droplast():
-    global traj_list
+def fn_traj_droplast(traj_list):
+    # global traj_list
 
     if traj_list:
         traj_list.pop()
 
     if traj_list:
+        img = fn_vis_realtime_traj(traj_list)
         traj_str = [f"{traj}" for traj in traj_list]
-        return ", ".join(traj_str)
+
+        return img, ", ".join(traj_str), gr.update(visible=True)
     else:
-        return "Click to specify trajectory"
+        return (
+            np.ones((canvas_height, canvas_width, 3), dtype=np.uint8) * 255,
+            "Click to specify trajectory",
+            gr.update(visible=True),
+        )
 
 
-def fn_traj_reset():
-    global traj_list
-    traj_list = []
-    return "Click to specify trajectory"
+def fn_traj_reset(traj_list):
+    # global traj_list
+    traj_list.clear()
+    # traj_list = []
+    return (
+        np.ones((canvas_height, canvas_width, 3), dtype=np.uint8) * 255,
+        "Click to specify trajectory",
+        gr.update(visible=True),
+    )
 
 
 def scale_traj_list_to_256(traj_list, canvas_width, canvas_height):
@@ -887,6 +903,7 @@ def draw_points(video, points):
     """
 
     T = video.shape[0]
+    N = len(points)
     device = video.device
     dtype = video.dtype
     video = video.cpu().numpy().copy()
@@ -904,36 +921,67 @@ def draw_points(video, points):
 
 
 def save_video_as_grid_and_mp4(video_batch: torch.Tensor, fps: int = 8, args=None, key=None, traj_points=None):
-    path = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
-
+    with tempfile.NamedTemporaryFile(dir=tempfile_dir, suffix=".mp4", delete=False) as f:
+        path = f.name
     vid = video_batch[0]
     x = rearrange(vid, "t c h w -> t h w c")
     x = x.mul(255).add(0.5).clamp(0, 255).to("cpu", torch.uint8)  # [T H W C]
 
-    # clean video
-    write_video(
-        path,
-        x,
-        fps=fps,
-        video_codec="libx264",
-        options={"crf": "18"},
-    )
-
     if traj_points is not None:
         # traj video
         x = draw_points(x, traj_points)
-        traj_path = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
+        with tempfile.NamedTemporaryFile(dir=tempfile_dir, suffix=".mp4", delete=False) as f:
+            traj_path = f.name
         write_video(
             traj_path,
             x,
             fps=fps,
             video_codec="libx264",
-            options={"crf": "18"},
+            options={"crf": "23"},
         )
-
+        print("write video success.")
         return [path, traj_path]
 
     return [path]
+
+
+def delete_old_files(folder_path="/tmp/Tora", hours=48, check_interval=3600 * 24):
+    """
+    Periodically checks and deletes files in the specified folder that were created more than the specified number of hours ago.
+
+    :param folder_path: The path of the folder to check
+    :param hours: The number of hours after which files will be deleted (default 48 hours)
+    :param check_interval: The interval (in seconds) at which to check for files (default once per day)
+    """
+    while True:
+        print("Checking temporary files...")
+        try:
+            # Get the current time in seconds since the epoch
+            now = time.time()
+            # Calculate the cutoff time in seconds
+            cutoff_time = now - hours * 3600
+
+            # Iterate over all files in the folder
+            for filename in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, filename)
+
+                # Ensure it is a file and not a directory
+                if os.path.isfile(file_path):
+                    # Get the creation time of the file
+                    creation_time = os.path.getctime(file_path)
+
+                    # Check if the file is older than the specified time
+                    if creation_time < cutoff_time:
+                        try:
+                            os.remove(file_path)
+                            print(f"Deleted file: {file_path}, creation time: {creation_time}")
+                        except Exception as e:
+                            print(f"Error deleting file: {file_path}. Error: {e}")
+        except Exception as e:
+            print(f"Error checking files: {e}")
+
+        # Sleep for the specified interval before checking again
+        time.sleep(check_interval)
 
 
 def cold_start(args):
@@ -954,7 +1002,7 @@ def cold_start(args):
     model.eval()
 
 
-def model_run_v2(prompt, seed, n_samples=1):
+def model_run_v2(prompt, seed, traj_list, n_samples=1):
     global model
 
     image_size = [480, 720]
@@ -968,7 +1016,7 @@ def model_run_v2(prompt, seed, n_samples=1):
     force_uc_zero_embeddings = ["txt"]
     device = model.device
 
-    global traj_list
+    # global traj_list
     global canvas_width, canvas_height
     traj_list_range_video = traj_list.copy()
     traj_list_range_256 = scale_traj_list_to_256(traj_list, canvas_width, canvas_height)
@@ -1071,7 +1119,7 @@ def model_run_v2(prompt, seed, n_samples=1):
         gc.collect()
         torch.cuda.empty_cache()
 
-        return gr.update(value=file_path_list, height=image_size[0], min_width=image_size[1])
+        return gr.update(value=file_path_list[1], height=image_size[0], width=image_size[1])
 
 
 def main(args):
@@ -1088,8 +1136,18 @@ def main(args):
 
     demo = gr.Blocks()
     with demo:
-        gr.Markdown(title)
-        gr.Markdown(description)
+        # gr.Markdown(title)
+        # gr.Markdown(description)
+        gr.Markdown("""
+            <div style="text-align: center; font-size: 32px; font-weight: bold; margin-bottom: 20px;">
+                Tora
+            </div>
+            <div style="text-align: center;font-size: 20px;">
+                <a href="https://github.com/alibaba/Tora">Github</a> |
+                <a href="https://ali-videoai.github.io/tora_video/">Project Page</a> |
+                <a href="https://arxiv.org/abs/2407.21705">arXiv</a>
+            </div>
+            """)
 
         with gr.Column():
             with gr.Row():
@@ -1097,15 +1155,15 @@ def main(args):
                     # step1.2 - object motion control - draw yourself
                     gr.Markdown("---\n## Step 1/2: Draw A Trajectory", show_label=False, visible=True)
                     gr.Markdown(
-                        "\n 1. **Click the `Canvas` to draw a trajectory.** Each click generates a new point on the trajectory. For time saving, \
-                                                  the click point will not appear in the canvas; \
-                                                \n 2. Click `Visualize Trajectory` to visualize the trajectory; \
-                                                \n 3. Click `Reset Trajectory` to reset the trajectory. ",
+                        "\n 1. **Click on the `Canvas` to create a trajectory.** Each click adds a new point to the trajectory. \
+                        \n 2. Click on `Visualize Trajectory` to view the trajectory as a video; \
+                        \n 3. Click on `Reset Trajectory` to clear the trajectory. (Currently, this demo does not support multi-trajectory control. To achieve multi-trajectory control, you can use the command line available on <a href='https://github.com/alibaba/Tora'>GitHub</a>.)",
                         show_label=False,
                         visible=True,
                     )
 
                     traj_args = gr.Textbox(value="", label="Points of Trajectory", visible=True)
+                    traj_list = gr.State([])
                     with gr.Row():
                         traj_vis = gr.Button(value="Visualize Trajectory", visible=True)
                         traj_reset = gr.Button(value="Reset Trajectory", visible=True)
@@ -1131,45 +1189,50 @@ def main(args):
             # step2 - Add prompt and Generate videos
             with gr.Row():
                 with gr.Column():
-                    step3_prompt_generate = gr.Markdown("---\n## Step 2/2: Add prompt", show_label=False, visible=True)
+                    step3_prompt_generate = gr.Markdown(
+                        "---\n## Step 2/2: Add prompt(Highly recommend using GPT-4o for refinement).",
+                        show_label=False,
+                        visible=True,
+                    )
                     prompt = gr.Textbox(value="", label="Prompt", interactive=True, visible=True)
                     n_samples = gr.Number(value=1, precision=0, interactive=True, label="n_samples", visible=False)
                     seed = gr.Number(value=1234, precision=0, interactive=True, label="Seed", visible=True)
                     start = gr.Button(value="Generate", visible=True)
                 with gr.Column():
-                    gen_video = gr.Gallery(value=None, label="Generate Video", visible=True)
+                    gen_video = gr.Video(value=None, label="Generate Video", visible=True)
+                    # gen_video = gr.Gallery(value=None, label="Generate Video", visible=True)
 
             # traj examples
             with gr.Column():
                 gr.Markdown("---\n## Trajectory Examples", show_label=False, visible=True)
                 with gr.Row():
-                    traj_1 = gr.Button(value="circle1", visible=True)
-                    traj_2 = gr.Button(value="circle2", visible=True)
+                    traj_1 = gr.Button(value="circle", visible=True)
+                    traj_2 = gr.Button(value="spiral", visible=True)
                     traj_3 = gr.Button(value="coaster", visible=True)
                     traj_4 = gr.Button(value="dance", visible=True)
                 with gr.Row():
                     traj_5 = gr.Button(value="infinity", visible=True)
                     traj_6 = gr.Button(value="pause", visible=True)
                     traj_7 = gr.Button(value="shake", visible=True)
-                    traj_8 = gr.Button(value="spiral", visible=True)
+                    traj_8 = gr.Button(value="wave", visible=True)
 
             # prompt examples
             with gr.Column():
                 gr.Markdown("---\n## Prompt Examples", show_label=False, visible=True)
                 with gr.Row():
-                    prompt_1 = gr.Button(value="ship", visible=True)
-                    prompt_2 = gr.Button(value="rubber duck", visible=True)
+                    prompt_1 = gr.Button(value="rubber duck", visible=True)
+                    prompt_2 = gr.Button(value="dandelion", visible=True)
                     prompt_3 = gr.Button(value="golden retriever", visible=True)
                     prompt_4 = gr.Button(value="squirrel", visible=True)
 
-        traj_1.click(fn=add_provided_traj, inputs=traj_1, outputs=traj_args)
-        traj_2.click(fn=add_provided_traj, inputs=traj_2, outputs=traj_args)
-        traj_3.click(fn=add_provided_traj, inputs=traj_3, outputs=traj_args)
-        traj_4.click(fn=add_provided_traj, inputs=traj_4, outputs=traj_args)
-        traj_5.click(fn=add_provided_traj, inputs=traj_5, outputs=traj_args)
-        traj_6.click(fn=add_provided_traj, inputs=traj_6, outputs=traj_args)
-        traj_7.click(fn=add_provided_traj, inputs=traj_7, outputs=traj_args)
-        traj_8.click(fn=add_provided_traj, inputs=traj_8, outputs=traj_args)
+        traj_1.click(fn=add_provided_traj, inputs=[traj_list, traj_1], outputs=[traj_input, traj_args, traj_input])
+        traj_2.click(fn=add_provided_traj, inputs=[traj_list, traj_2], outputs=[traj_input, traj_args, traj_input])
+        traj_3.click(fn=add_provided_traj, inputs=[traj_list, traj_3], outputs=[traj_input, traj_args, traj_input])
+        traj_4.click(fn=add_provided_traj, inputs=[traj_list, traj_4], outputs=[traj_input, traj_args, traj_input])
+        traj_5.click(fn=add_provided_traj, inputs=[traj_list, traj_5], outputs=[traj_input, traj_args, traj_input])
+        traj_6.click(fn=add_provided_traj, inputs=[traj_list, traj_6], outputs=[traj_input, traj_args, traj_input])
+        traj_7.click(fn=add_provided_traj, inputs=[traj_list, traj_7], outputs=[traj_input, traj_args, traj_input])
+        traj_8.click(fn=add_provided_traj, inputs=[traj_list, traj_8], outputs=[traj_input, traj_args, traj_input])
 
         prompt_1.click(fn=add_provided_prompt, inputs=prompt_1, outputs=prompt)
         prompt_2.click(fn=add_provided_prompt, inputs=prompt_2, outputs=prompt)
@@ -1178,19 +1241,19 @@ def main(args):
 
         traj_vis.click(
             fn=fn_vis_traj,
-            inputs=None,
-            outputs=[vis_traj, step3_prompt_generate, prompt, n_samples, seed, start, gen_video],
+            inputs=traj_list,
+            outputs=[vis_traj],
         )
-        traj_input.select(fn=add_traj_point, inputs=None, outputs=traj_args)
-        traj_droplast.click(fn=fn_traj_droplast, inputs=None, outputs=traj_args)
-        traj_reset.click(fn=fn_traj_reset, inputs=None, outputs=traj_args)
+        traj_input.select(fn=add_traj_point, inputs=traj_list, outputs=[traj_input, traj_args])
+        traj_droplast.click(fn=fn_traj_droplast, inputs=traj_list, outputs=[traj_input, traj_args, traj_input])
+        traj_reset.click(fn=fn_traj_reset, inputs=traj_list, outputs=[traj_input, traj_args, traj_input])
 
-        global traj_list
-        start.click(fn=model_run_v2, inputs=[prompt, seed, n_samples], outputs=gen_video)
+        # global traj_list
+        start.click(fn=model_run_v2, inputs=[prompt, seed, traj_list, n_samples], outputs=gen_video)
 
         gr.Markdown(article)
 
-    demo.queue(max_size=10).launch(**args)
+    demo.queue(max_size=32).launch(**args)
 
 
 if __name__ == "__main__":
@@ -1218,7 +1281,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--base", type=str, default="configs/tora/model/cogvideox_5b_tora.yaml configs/tora/inference_sparse.yaml"
     )
-    parser.add_argument("--load", type=str, default="ckpts/tora/t2v")
+    parser.add_argument("--load", type=str, default="ckpts/tora/t2v/")
 
     args = parser.parse_args()
 
@@ -1255,5 +1318,7 @@ if __name__ == "__main__":
 
     cold_start(args=tora_args)
     print("******************** model loaded ********************")
+
+    threading.Thread(target=delete_old_files, args=("/tmp/Tora", 48, 3600 * 24), daemon=True).start()
 
     main(launch_kwargs)
