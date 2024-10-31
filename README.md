@@ -11,9 +11,11 @@ Zhenghao Zhang\*, Junchao Liao\*, Menghao Li, Zuozhuo Dai, Bingxue Qiu, Siyu Zhu
 <a href='https://arxiv.org/abs/2407.21705'><img src='https://img.shields.io/badge/ArXiv-2407.21705-red'></a>
 <a href='https://ali-videoai.github.io/tora_video/'><img src='https://img.shields.io/badge/Project-Page-Blue'></a>
 <a href="https://github.com/alibaba/Tora"><img src='https://img.shields.io/badge/Github-Link-orange'></a>
-<a href='https://www.modelscope.cn/studios/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖%20ModelScope-demo-blue'></a>
-<a href='https://modelscope.cn/models/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖%20ModelScope-weights-blue'></a>
+<a href='https://www.modelscope.cn/studios/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖_ModelScope-ZH_demo-%23654dfc'></a>
+<a href='https://www.modelscope.cn/studios/Alibaba_Research_Intelligence_Computing/Tora_En'><img src='https://img.shields.io/badge/🤖_ModelScope-EN_demo-%23654dfc'></a>
 
+<a href='https://modelscope.cn/models/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖_ModelScope-weights-%23654dfc'></a>
+<a href='https://huggingface.co/Le0jc/Tora'><img src='https://img.shields.io/badge/🤗_HuggingFace-weights-%23ff9e0e'></a>
 </div>
 
 This is the official repository for paper "Tora: Trajectory-oriented Diffusion Transformer for Video Generation".
@@ -24,6 +26,7 @@ Recent advancements in Diffusion Transformer (DiT) have demonstrated remarkable 
 
 ## 📣 Updates
 
+- `2024/10/31` Model weights uploaded to [HuggingFace](https://huggingface.co/Le0jc/Tora). We also provided an English demo on [ModelScope](https://www.modelscope.cn/studios/Alibaba_Research_Intelligence_Computing/Tora_En).
 - `2024/10/23` 🔥🔥Our [ModelScope Demo](https://www.modelscope.cn/studios/xiaoche/Tora) is launched. Welcome to try it out! We also upload the model weights to [ModelScope](https://www.modelscope.cn/models/xiaoche/Tora).
 - `2024/10/21` Thanks to [@kijai](https://github.com/kijai) for supporting Tora in ComfyUI! [Link](https://github.com/kijai/ComfyUI-CogVideoXWrapper)
 - `2024/10/15` 🔥🔥We released our inference code and model weights. **Please note that this is a CogVideoX version of Tora, built on the CogVideoX-5B model. This version of Tora is meant for academic research purposes only. Due to our commercial plans, we will not be open-sourcing the complete version of Tora at this time.**
@@ -99,6 +102,37 @@ Tora
 ```
 
 ### Download Links
+*Note: Downloading the `tora` weights requires following the [CogVideoX License](CogVideoX_LICENSE).* You can choose one of the following options: HuggingFace, ModelScope, or native links.
+After downloading the model weights, you can put them in the `Tora/sat/ckpts` folder.
+
+#### HuggingFace
+
+```bash
+# This can be faster
+pip install "huggingface_hub[hf_transfer]"
+HF_HUB_ENABLE_HF_TRANSFER=1 huggingface-cli download Le0jc/Tora --local-dir ckpts
+```
+
+or
+
+```bash
+# use git
+git lfs install
+git clone https://huggingface.co/Le0jc/Tora
+```
+#### ModelScope
+- SDK 
+```bash
+from modelscope import snapshot_download
+model_dir = snapshot_download('xiaoche/Tora')
+```
+
+- Git 
+```bash
+git clone https://www.modelscope.cn/xiaoche/Tora.git
+```
+
+#### Native
 
 - Download the VAE and T5 model following [CogVideo](https://github.com/THUDM/CogVideo/blob/main/sat/README.md#2-download-model-weights):
     - VAE: https://cloud.tsinghua.edu.cn/f/fdba7608a49c463ba754/?dl=1
