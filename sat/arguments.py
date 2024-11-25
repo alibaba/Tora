@@ -66,10 +66,18 @@ def add_sampling_config_args(parser):
         default=None,
     )
     group.add_argument("--vis_traj_features", type=bool, default=False)
-    group.add_argument("--sample_flow", type=bool, default=True)
-
+    group.add_argument("--batch_size", type=int, default=1)
     return parser
 
+
+def add_training_extra_config_args(parser):
+    """Extra training arguments."""
+
+    group = parser.add_argument_group("train_extra", "Extra training configurations")
+    group.add_argument("--sample_flow", type=bool, default=True)
+    group.add_argument("--do_fuse_object_features", type=bool, default=False)
+    group.add_argument("--use_raft", type=bool, default=True)
+    return parser
 
 def get_args(args_list=None, parser=None):
     """Parse all the args."""
@@ -80,6 +88,7 @@ def get_args(args_list=None, parser=None):
     parser = add_model_config_args(parser)
     parser = add_sampling_config_args(parser)
     parser = add_training_args(parser)
+    parser = add_training_extra_config_args(parser)
     parser = add_evaluation_args(parser)
     parser = add_data_args(parser)
 

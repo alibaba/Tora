@@ -16,6 +16,7 @@ Zhenghao Zhang\*, Junchao Liao\*, Menghao Li, Zuozhuo Dai, Bingxue Qiu, Siyu Zhu
 
 <a href='https://modelscope.cn/models/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖_ModelScope-weights-%23654dfc'></a>
 <a href='https://huggingface.co/Le0jc/Tora'><img src='https://img.shields.io/badge/🤗_HuggingFace-weights-%23ff9e0e'></a>
+
 </div>
 
 This is the official repository for paper "Tora: Trajectory-oriented Diffusion Transformer for Video Generation".
@@ -26,6 +27,7 @@ Recent advancements in Diffusion Transformer (DiT) have demonstrated remarkable 
 
 ## 📣 Updates
 
+- `2024/11/25` 🔥Text-to-Video training code released.
 - `2024/10/31` Model weights uploaded to [HuggingFace](https://huggingface.co/Le0jc/Tora). We also provided an English demo on [ModelScope](https://www.modelscope.cn/studios/Alibaba_Research_Intelligence_Computing/Tora_En).
 - `2024/10/23` 🔥🔥Our [ModelScope Demo](https://www.modelscope.cn/studios/xiaoche/Tora) is launched. Welcome to try it out! We also upload the model weights to [ModelScope](https://www.modelscope.cn/models/xiaoche/Tora).
 - `2024/10/21` Thanks to [@kijai](https://github.com/kijai) for supporting Tora in ComfyUI! [Link](https://github.com/kijai/ComfyUI-CogVideoXWrapper)
@@ -35,16 +37,17 @@ Recent advancements in Diffusion Transformer (DiT) have demonstrated remarkable 
 
 ## 📑 Table of Contents
 
-- [Showcases](#%EF%B8%8F-showcases)
-- [TODO List](#-todo-list)
-- [Installation](#-installation)
-- [Model Weights](#-model-weights)
-- [Inference](#-inference)
-- [Gradio Demo](#%EF%B8%8F-gradio-demo)
-- [Troubleshooting](#-troubleshooting)
-- [Acknowledgements](#-acknowledgements)
-- [Our previous work](#-our-previous-work)
-- [Citation](#-citation)
+- [🎞️ Showcases](#%EF%B8%8F-showcases)
+- [✅ TODO List](#-todo-list)
+- [🐍 Installation](#-installation)
+- [📦 Model Weights](#-model-weights)
+- [🔄 Inference](#-inference)
+- [🖥️ Gradio Demo](#%EF%B8%8F-gradio-demo)
+- [🧠 Training](#-training)
+- [🎯 Troubleshooting](#-troubleshooting)
+- [🤝 Acknowledgements](#-acknowledgements)
+- [📄 Our previous work](#-our-previous-work)
+- [📚 Citation](#-citation)
 
 ## 🎞️ Showcases
 
@@ -60,7 +63,7 @@ All videos are available in this [Link](https://cloudbook-public-daily.oss-cn-ha
 
 - [x] Release our inference code and model weights
 - [x] Provide a ModelScope Demo
-- [ ] Release our training code
+- [x] Release our training code
 - [ ] Release complete version of Tora
 
 ## 🐍 Installation
@@ -96,12 +99,15 @@ Tora
         │   └── ...
         ├── vae
         │   └── 3d-vae.pt
-        └── tora
-            └── t2v
-                └── mp_rank_00_model_states.pt
+        ├── tora
+        │   └── t2v
+        │       └── mp_rank_00_model_states.pt
+        └── CogVideoX-5b-sat # for training stage 1
+            └── mp_rank_00_model_states.pt
 ```
 
 ### Download Links
+
 *Note: Downloading the `tora` weights requires following the [CogVideoX License](CogVideoX_LICENSE).* You can choose one of the following options: HuggingFace, ModelScope, or native links.
 After downloading the model weights, you can put them in the `Tora/sat/ckpts` folder.
 
@@ -120,14 +126,18 @@ or
 git lfs install
 git clone https://huggingface.co/Le0jc/Tora
 ```
+
 #### ModelScope
-- SDK 
+
+- SDK
+
 ```bash
 from modelscope import snapshot_download
 model_dir = snapshot_download('xiaoche/Tora')
 ```
 
-- Git 
+- Git
+
 ```bash
 git clone https://www.modelscope.cn/xiaoche/Tora.git
 ```
@@ -168,6 +178,26 @@ Usage:
 ```bash
 cd sat
 python app.py --load ckpts/tora/t2v
+```
+
+## 🧠 Training
+
+It requires around 60 GiB GPU memory tested on NVIDIA A100.
+
+Replace `$N_GPU` with the number of GPUs you want to use.
+
+### Text to Video
+
+- Stage 1
+
+```bash
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True torchrun --standalone --nproc_per_node=$N_GPU train_video.py --base configs/tora/model/cogvideox_5b_tora.yaml configs/tora/train_dense.yaml --experiment-name "t2v-stage1"
+```
+
+- Stage 2
+
+```bash
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True torchrun --standalone --nproc_per_node=$N_GPU train_video.py --base configs/tora/model/cogvideox_5b_tora.yaml configs/tora/train_sparse.yaml --experiment-name "t2v-stage2"
 ```
 
 ## 🎯 Troubleshooting

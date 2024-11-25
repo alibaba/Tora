@@ -1,41 +1,15 @@
 args:
   latent_channels: 16
   mode: inference
-  # load: "{your lora folder} such as zRzRzRzRzRzRzR/lora-disney-08-20-13-28" # This is for Full model without lora adapter
 
   batch_size: 1
   input_type: txt
-  # input_file: assets/text/davis_select_camera_static.txt
-  sampling_num_frames: 13  # Must be 13, 11 or 9
+  sampling_num_frames: 13
   sampling_fps: 8
-  # fp16: True # For CogVideoX-2B
-  bf16: True # For CogVideoX-5B
-  # output_dir: samples_flow/
+  bf16: True
   force_inference: True
 
-
-  #Tora trajectory setting
   no_flow_injection: False
   flow_path: Null
-  img_dir: './datasets/DAVIS/first_frame'
   flow_from_prompt: False
-  # point_path: ['./trajs/shake_1.txt']
   vis_traj_features: False
-
-  conditioner_config:
-    target: sgm.modules.GeneralConditioner
-    params:
-      emb_models:
-        - is_trainable: false
-          input_key: txt
-          ucg_rate: 0.1
-          target: sgm.modules.encoders.modules.FrozenT5Embedder
-          params:
-            model_dir: "ckpts/t5-v1_1-xxl" ## T5 模型路径
-            max_length: 226
-
-  first_stage_config:
-    target: sgm.models.autoencoder.VideoAutoencoderInferenceWrapper
-    params:
-      cp_size: 1
-      ckpt_path: "ckpts/vae/3d-vae.pt" ## VAE 模型路径

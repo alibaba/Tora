@@ -392,9 +392,9 @@ class SFTDataset(Dataset):
             actual_fps = vr.get_avg_fps()
             ori_vlen = len(vr)
 
-            if ori_vlen / actual_fps * fps > max_num_frames and actual_fps >= fps:
+            if (ori_vlen - skip_frms_num * 2) / actual_fps * fps > max_num_frames and actual_fps >= fps:
                 num_frames = max_num_frames
-                start = int(skip_frms_num)
+                start = random.randint(skip_frms_num, ori_vlen - skip_frms_num - int(num_frames / fps * actual_fps))
                 end = int(start + num_frames / fps * actual_fps)
                 end_safty = min(int(start + num_frames / fps * actual_fps), int(ori_vlen))
                 indices = np.arange(start, end, (end - start) // num_frames).astype(int)
