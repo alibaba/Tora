@@ -64,6 +64,7 @@ All videos are available in this [Link](https://cloudbook-public-daily.oss-cn-ha
 - [x] Release our inference code and model weights
 - [x] Provide a ModelScope Demo
 - [x] Release our training code
+- [ ] Migrate to diffusers and optimize the GPU memory usage
 - [ ] Release complete version of Tora
 
 ## 🐍 Installation
