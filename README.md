@@ -27,6 +27,7 @@ Recent advancements in Diffusion Transformer (DiT) have demonstrated remarkable 
 
 ## 📣 Updates
 
+- `2024/12/09` 🔥🔥Diffusers version of Tora and the corresponding model weights are released. Inference VRAM requirements are reduced to around 5 GiB. Please refer to [this](diffusers-version/README.md) for details.
 - `2024/11/25` 🔥Text-to-Video training code released.
 - `2024/10/31` Model weights uploaded to [HuggingFace](https://huggingface.co/Le0jc/Tora). We also provided an English demo on [ModelScope](https://www.modelscope.cn/studios/Alibaba_Research_Intelligence_Computing/Tora_En).
 - `2024/10/23` 🔥🔥Our [ModelScope Demo](https://www.modelscope.cn/studios/xiaoche/Tora) is launched. Welcome to try it out! We also upload the model weights to [ModelScope](https://www.modelscope.cn/models/xiaoche/Tora).
@@ -39,6 +40,7 @@ Recent advancements in Diffusion Transformer (DiT) have demonstrated remarkable 
 
 - [🎞️ Showcases](#%EF%B8%8F-showcases)
 - [✅ TODO List](#-todo-list)
+- [🧨 Diffusers verision](#-diffusers-verision)
 - [🐍 Installation](#-installation)
 - [📦 Model Weights](#-model-weights)
 - [🔄 Inference](#-inference)
@@ -64,10 +66,16 @@ All videos are available in this [Link](https://cloudbook-public-daily.oss-cn-ha
 - [x] Release our inference code and model weights
 - [x] Provide a ModelScope Demo
 - [x] Release our training code
-- [ ] Migrate to diffusers and optimize the GPU memory usage
+- [x] Release diffusers version and optimize the GPU memory usage
 - [ ] Release complete version of Tora
 
+## 🧨 Diffusers verision
+
+Please refer to [the diffusers version](diffusers-version/README.md) for details.
+
 ## 🐍 Installation
+
+Please make sure your Python version is between 3.10 and 3.12, inclusive of both 3.10 and 3.12.
 
 ```bash
 # Clone this repository.
