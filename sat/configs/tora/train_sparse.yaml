@@ -11,8 +11,8 @@ args:
   save: outputs
   save_interval: 2000
   log_interval: 1
-  train_data: ["<path/to/your/train_data>"]
-  valid_data: ["<path/to/your/valid_data>"]
+  train_data: ["sat/training_examples"]
+  valid_data: ["sat/training_examples"]
   split: 1,0,0
   num_workers: 8
   force_train: True

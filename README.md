@@ -183,11 +183,29 @@ python app.py --load ckpts/tora/t2v
 
 ## 🧠 Training
 
+### Data Preparation
+
+Following this guide https://github.com/THUDM/CogVideo/blob/main/sat/README.md#preparing-the-dataset, structure the datasets as follows:
+
+```
+.
+├── labels
+│   ├── 1.txt
+│   ├── 2.txt
+│   ├── ...
+└── videos
+    ├── 1.mp4
+    ├── 2.mp4
+    ├── ...
+```
+
+Training data examples are in `sat/training_examples`
+
+### Text to Video
+
 It requires around 60 GiB GPU memory tested on NVIDIA A100.
 
 Replace `$N_GPU` with the number of GPUs you want to use.
-
-### Text to Video
 
 - Stage 1
 
