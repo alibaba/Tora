@@ -19,11 +19,34 @@ pip install -r requirements.txt
 
 ## Model Weights
 
-Download model weights:
+- #### HuggingFace
+
+```bash
+# This can be faster
+pip install "huggingface_hub[hf_transfer]"
+HF_HUB_ENABLE_HF_TRANSFER=1 huggingface-cli download Le0jc/Tora_T2V_diffusers --local-dir ckpts/Tora_T2V_diffusers
+```
+
+or
+
+```bash
+# use git
+git lfs install
+git clone https://huggingface.co/Le0jc/Tora_T2V_diffusers
+```
+
+- #### ModelScope
 
 ```bash
 pip install modelscope
 modelscope download --model Alibaba_Research_Intelligence_Computing/Tora_T2V_diffusers --local_dir ckpts/Tora_T2V_diffusers
+```
+
+or
+
+```bash
+git lfs install
+git clone https://www.modelscope.cn/Alibaba_Research_Intelligence_Computing/Tora_T2V_diffusers.git
 ```
 
 ## Inference
