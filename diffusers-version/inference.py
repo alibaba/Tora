@@ -145,14 +145,17 @@ def generate_video(
         pipe.enable_model_cpu_offload()
     else:
         pipe.to("cuda")
+
     if args.enable_slicing:
         pipe.vae.enable_slicing()
     if args.enable_tiling:
         pipe.vae.enable_tiling()
+    if args.enable_compile:
+        pipe.transformer = torch.compile(pipe.transformer, backend="inductor")
+        pipe.transformer.is_compiled = True
 
     # 4. Generate the video frames based on the prompt.
     # `num_frames` is the Number of frames to generate.
-    # print(flow.shape)
     if generate_type == "i2v":
         video_generate = pipe(
             height=height,
@@ -242,6 +245,18 @@ if __name__ == "__main__":
         default=False,
         help="Whether to use VAE tiling for saving GPU memory.",
     )
+    parser.add_argument(
+        "--enable_sageattention",
+        action="store_true",
+        default=False,
+        help="Whether to use SageAttention.",
+    )
+    parser.add_argument(
+        "--enable_compile",
+        action="store_true",
+        default=False,
+        help="Whether to use torch.compile to speed up inference.",
+    )
 
     # for tora flow
     parser.add_argument("--flow_path", type=str, default=None, help="The path of the flow")
@@ -254,6 +269,13 @@ if __name__ == "__main__":
     dtype = torch.float16 if args.dtype == "float16" else torch.bfloat16
     total_num_frames = args.num_frames
     image_size = (args.width, args.height)
+
+    if args.enable_sageattention:
+        import torch.nn.functional as F
+        from sageattention import sageattn
+
+        F.scaled_dot_product_attention = sageattn
+
     if args.no_flow_injection:
         print("No flow injection")
         video_flow = None
@@ -276,7 +298,6 @@ if __name__ == "__main__":
         video_flow = flow_to_image(tmp).unsqueeze_(0).to("cuda", dtype)  # [1 T C H W]
         del tmp
         video_flow = video_flow / (255.0 / 2) - 1
-        # video_flow_image = rearrange(video_flow, "B C T H W -> (B T) H W C")
 
     generate_video(
         args=args,
@@ -299,3 +320,5 @@ if __name__ == "__main__":
         seed=args.seed,
         fps=args.fps,
     )
+
+    print(f"max_memory_allocated: {torch.cuda.max_memory_allocated() / 1024 ** 3 :.2f} GiB")

@@ -806,8 +806,9 @@ class ToraPipeline(DiffusionPipeline, CogVideoXLoraLoaderMixin):
         else:
             video = latents
 
-        # Offload all models
-        self.maybe_free_model_hooks()
+        # Offload all models. A compiled model seems to not support maybe_free_model_hooks. Add this to prevent error.
+        if not getattr(self.transformer, "is_compiled", False):
+            self.maybe_free_model_hooks()
 
         if not return_dict:
             return (video,)

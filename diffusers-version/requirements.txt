@@ -1,4 +1,5 @@
 git+https://github.com/huggingface/diffusers.git
+git+https://github.com/thu-ml/SageAttention.git
 accelerate>=1.1.1
 transformers>=4.46.3
 numpy

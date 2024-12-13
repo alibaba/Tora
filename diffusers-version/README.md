@@ -53,8 +53,9 @@ git clone https://www.modelscope.cn/Alibaba_Research_Intelligence_Computing/Tora
 
 ```bash
 cd diffusers-version
-python inference.py --prompt "A squirrel gathering nuts." --model_path ckpts/Tora_T2V_diffusers --output_path ./output.mp4 --generate_type t2v --point_path ../sat/trajs/pause.txt --enable_model_cpu_offload --enable_slicing --enable_tiling
+python inference.py --prompt "A squirrel gathering nuts." --model_path ckpts/Tora_T2V_diffusers --output_path ./output.mp4 --generate_type t2v --point_path ../sat/trajs/pause.txt --enable_model_cpu_offload --enable_slicing --enable_tiling --enable_sageattention --enable_compile
 ```
 
 - If your VRAM is still not enough, you can replace "--enable_model_cpu_offload" to "--enable_sequential_cpu_offload" and try again. This can reduce the VRAM usage to about 5 GiB. Note that sequential_cpu_offload is much slower.
 - If you have enough VRAM, you can disable cpu offload, VAE slicing and tiling, to speed up the inference.
+- Note that --enable_compile will speed up inference at the cost of slowing down the first inference step.
