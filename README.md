@@ -27,6 +27,7 @@ Recent advancements in Diffusion Transformer (DiT) have demonstrated remarkable 
 
 ## 📣 Updates
 
+- `2024/12/13` SageAttention2 and model compilation are supported in diffusers version. Tested on the A10, these approaches speed up every inference step by approximately 52%, except for the first step.
 - `2024/12/09` 🔥🔥Diffusers version of Tora and the corresponding model weights are released. Inference VRAM requirements are reduced to around 5 GiB. Please refer to [this](diffusers-version/README.md) for details.
 - `2024/11/25` 🔥Text-to-Video training code released.
 - `2024/10/31` Model weights uploaded to [HuggingFace](https://huggingface.co/Le0jc/Tora). We also provided an English demo on [ModelScope](https://www.modelscope.cn/studios/Alibaba_Research_Intelligence_Computing/Tora_En).
