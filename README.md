@@ -7,16 +7,21 @@
 Zhenghao Zhang\*, Junchao Liao\*, Menghao Li, Zuozhuo Dai, Bingxue Qiu, Siyu Zhu, Long Qin, Weizhi Wang
 
 \* equal contribution
+<br>
 
 <a href='https://arxiv.org/abs/2407.21705'><img src='https://img.shields.io/badge/ArXiv-2407.21705-red'></a>
 <a href='https://ali-videoai.github.io/tora_video/'><img src='https://img.shields.io/badge/Project-Page-Blue'></a>
 <a href="https://github.com/alibaba/Tora"><img src='https://img.shields.io/badge/Github-Link-orange'></a>
 <a href='https://www.modelscope.cn/studios/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖_ModelScope-ZH_demo-%23654dfc'></a>
 <a href='https://www.modelscope.cn/studios/Alibaba_Research_Intelligence_Computing/Tora_En'><img src='https://img.shields.io/badge/🤖_ModelScope-EN_demo-%23654dfc'></a>
+<br>
 
-<a href='https://modelscope.cn/models/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖_ModelScope-weights-%23654dfc'></a>
-<a href='https://huggingface.co/Le0jc/Tora'><img src='https://img.shields.io/badge/🤗_HuggingFace-weights-%23ff9e0e'></a>
+<a href='https://modelscope.cn/models/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖_ModelScope-T2V_weights(SAT)-%23654dfc'></a>
+<a href='https://modelscope.cn/models/Alibaba_Research_Intelligence_Computing/Tora_T2V_diffusers'><img src='https://img.shields.io/badge/🤖_ModelScope-T2V_weights(diffusers)-%23654dfc'></a>
+<br>
 
+<a href='https://huggingface.co/Le0jc/Tora'><img src='https://img.shields.io/badge/🤗_HuggingFace-T2V_weights(SAT)-%23ff9e0e'></a>
+<a href='https://huggingface.co/Le0jc/Tora_T2V_diffusers'><img src='https://img.shields.io/badge/🤗_HuggingFace-T2V_weights(diffusers)-%23ff9e0e'></a>
 </div>
 
 This is the official repository for paper "Tora: Trajectory-oriented Diffusion Transformer for Video Generation".
