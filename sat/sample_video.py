@@ -16,6 +16,7 @@ from arguments import get_args
 from diffusion_video import SATVideoDiffusionEngine
 from einops import rearrange, repeat
 from omegaconf import ListConfig
+from PIL import Image
 from torchvision.io import write_video
 from torchvision.transforms import InterpolationMode
 from torchvision.transforms.functional import resize
@@ -210,6 +211,11 @@ def sampling_main(args, model_cls):
 
     image_size = [480, 720]
 
+    if args.image2video:
+        chained_trainsforms = []
+        chained_trainsforms.append(TT.ToTensor())
+        transform = TT.Compose(chained_trainsforms)
+
     sample_func = model.sample
     T, H, W, C, F = args.sampling_num_frames, image_size[0], image_size[1], args.latent_channels, 8
     num_samples = [1]
@@ -217,9 +223,29 @@ def sampling_main(args, model_cls):
     device = model.device
     with torch.no_grad():
         for text, cnt in tqdm(data_iter):
+            print(text)
             set_random_seed(args.seed)
-            if args.flow_from_prompt:
-                text, flow_files = text.split("\t")
+            if args.image2video:
+                if args.flow_from_prompt:
+                    text, image_path, flow_files = text.strip().split("@@@")
+                    print(flow_files, image_path)
+                else:
+                    text, image_path = text.split("@@")
+                image_path = os.path.join(args.img_dir, image_path)
+                assert os.path.exists(image_path), image_path
+                image = Image.open(image_path).convert("RGB")
+                image = image.resize(tuple(reversed(image_size)))
+                image = transform(image).unsqueeze(0).to("cuda")
+                image = image * 2.0 - 1.0
+                image = image.unsqueeze(2).to(torch.bfloat16)
+                image = model.encode_first_stage(image, None)
+                image = image.permute(0, 2, 1, 3, 4).contiguous()
+                pad_shape = (image.shape[0], T - 1, C, H // F, W // F)
+                image = torch.concat([image, torch.zeros(pad_shape).to(image.device).to(image.dtype)], dim=1)
+            else:
+                image = None
+                if args.flow_from_prompt:
+                    text, flow_files = text.split("\t")
             total_num_frames = (T - 1) * 4 + 1  # T is the video latent size, 13 * 4 = 52
             if args.no_flow_injection:
                 video_flow = None
@@ -262,15 +288,14 @@ def sampling_main(args, model_cls):
                 video_flow = (
                     rearrange(video_flow / 255.0 * 2 - 1, "B T C H W -> B C T H W").contiguous().to(torch.bfloat16)
                 )
-                torch.cuda.empty_cache()
                 video_flow = video_flow.repeat(2, 1, 1, 1, 1).contiguous()  # for uncondition
                 model.first_stage_model.to(device)
+                torch.cuda.empty_cache()
                 video_flow = model.encode_first_stage(video_flow, None)
                 video_flow = video_flow.permute(0, 2, 1, 3, 4).contiguous()
-                model.to(device)
+            torch.cuda.empty_cache()
+            model.to(device)
 
-            print("rank:", rank, "start to process", text, cnt)
-            # TODO: broadcast image2video
             value_dict = {
                 "prompt": text,
                 "negative_prompt": "",
@@ -296,7 +321,15 @@ def sampling_main(args, model_cls):
             for k in c:
                 if not k == "crossattn":
                     c[k], uc[k] = map(lambda y: y[k][: math.prod(num_samples)].to("cuda"), (c, uc))
-            for index in range(args.batch_size):
+
+            if args.image2video and image is not None:
+                c["concat"] = image
+                uc["concat"] = image
+
+            for index in range(args.num_samples_per_prompt):
+                if cnt > 0:
+                    args.seed = np.random.randint(1e6)
+                    set_random_seed(args.seed)
                 # reload model on GPU
                 model.to(device)
                 samples_z = sample_func(

@@ -16,12 +16,12 @@ Zhenghao Zhang\*, Junchao Liao\*, Menghao Li, Zuozhuo Dai, Bingxue Qiu, Siyu Zhu
 <a href='https://www.modelscope.cn/studios/Alibaba_Research_Intelligence_Computing/Tora_En'><img src='https://img.shields.io/badge/🤖_ModelScope-EN_demo-%23654dfc'></a>
 <br>
 
-<a href='https://modelscope.cn/models/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖_ModelScope-T2V_weights(SAT)-%23654dfc'></a>
+<a href='https://modelscope.cn/models/xiaoche/Tora'><img src='https://img.shields.io/badge/🤖_ModelScope-T2V/I2V_weights(SAT)-%23654dfc'></a>
 <a href='https://modelscope.cn/models/Alibaba_Research_Intelligence_Computing/Tora_T2V_diffusers'><img src='https://img.shields.io/badge/🤖_ModelScope-T2V_weights(diffusers)-%23654dfc'></a>
 <br>
 
-<a href='https://huggingface.co/Le0jc/Tora'><img src='https://img.shields.io/badge/🤗_HuggingFace-T2V_weights(SAT)-%23ff9e0e'></a>
-<a href='https://huggingface.co/Le0jc/Tora_T2V_diffusers'><img src='https://img.shields.io/badge/🤗_HuggingFace-T2V_weights(diffusers)-%23ff9e0e'></a>
+<a href='https://huggingface.co/Alibaba-Research-Intelligence-Computing/Tora'><img src='https://img.shields.io/badge/🤗_HuggingFace-T2V/I2V_weights(SAT)-%23ff9e0e'></a>
+<a href='https://huggingface.co/Alibaba-Research-Intelligence-Computing/Tora_T2V_diffusers'><img src='https://img.shields.io/badge/🤗_HuggingFace-T2V_weights(diffusers)-%23ff9e0e'></a>
 </div>
 
 This is the official repository for paper "Tora: Trajectory-oriented Diffusion Transformer for Video Generation".
@@ -32,6 +32,7 @@ Recent advancements in Diffusion Transformer (DiT) have demonstrated remarkable 
 
 ## 📣 Updates
 
+- `2025/01/06` 🔥🔥We released Tora Image-to-Video, including inference code and model weights.
 - `2024/12/13` SageAttention2 and model compilation are supported in diffusers version. Tested on the A10, these approaches speed up every inference step by approximately 52%, except for the first step.
 - `2024/12/09` 🔥🔥Diffusers version of Tora and the corresponding model weights are released. Inference VRAM requirements are reduced to around 5 GiB. Please refer to [this](diffusers-version/README.md) for details.
 - `2024/11/25` 🔥Text-to-Video training code released.
@@ -73,7 +74,7 @@ All videos are available in this [Link](https://cloudbook-public-daily.oss-cn-ha
 - [x] Provide a ModelScope Demo
 - [x] Release our training code
 - [x] Release diffusers version and optimize the GPU memory usage
-- [ ] Release complete version of Tora
+- [x] Release complete version of Tora
 
 ## 🧨 Diffusers verision
 
@@ -115,6 +116,8 @@ Tora
         ├── vae
         │   └── 3d-vae.pt
         ├── tora
+        │   ├── i2v
+        │   │   └── mp_rank_00_model_states.pt
         │   └── t2v
         │       └── mp_rank_00_model_states.pt
         └── CogVideoX-5b-sat # for training stage 1
@@ -131,7 +134,7 @@ After downloading the model weights, you can put them in the `Tora/sat/ckpts` fo
 ```bash
 # This can be faster
 pip install "huggingface_hub[hf_transfer]"
-HF_HUB_ENABLE_HF_TRANSFER=1 huggingface-cli download Le0jc/Tora --local-dir ckpts
+HF_HUB_ENABLE_HF_TRANSFER=1 huggingface-cli download Alibaba-Research-Intelligence-Computing/Tora --local-dir ckpts
 ```
 
 or
@@ -139,7 +142,7 @@ or
 ```bash
 # use git
 git lfs install
-git clone https://huggingface.co/Le0jc/Tora
+git clone https://huggingface.co/Alibaba-Research-Intelligence-Computing/Tora
 ```
 
 #### ModelScope
@@ -166,6 +169,7 @@ git clone https://www.modelscope.cn/xiaoche/Tora.git
 
 ## 🔄 Inference
 
+### Text to Video
 It requires around 30 GiB GPU memory tested on NVIDIA A100.
 
 ```bash
@@ -176,6 +180,15 @@ PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True torchrun --standalone --nproc_p
 You can change the `--input-file` and `--point_path` to your own prompts and trajectory points files. Please note that the trajectory is drawn on a 256x256 canvas.
 
 Replace `$N_GPU` with the number of GPUs you want to use.
+
+### Image to Video
+
+```bash
+cd sat
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True torchrun --standalone --nproc_per_node=$N_GPU sample_video.py --base configs/tora/model/cogvideox_5b_tora_i2v.yaml configs/tora/inference_sparse.yaml --load ckpts/tora/i2v --output-dir samples --point_path trajs/sawtooth.txt --input-file assets/text/i2v/examples.txt --img_dir assets/images --image2video
+```
+
+The first frame images should be placed in the `--img_dir`. The names of these images should be specified in the corresponding text prompt in `--input-file`, seperated by `@@`.
 
 ### Recommendations for Text Prompts
 

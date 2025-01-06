@@ -66,7 +66,8 @@ def add_sampling_config_args(parser):
         default=None,
     )
     group.add_argument("--vis_traj_features", type=bool, default=False)
-    group.add_argument("--batch_size", type=int, default=1)
+    group.add_argument("--img_dir", type=str, default="cli")
+    group.add_argument("--num_samples_per_prompt", type=int, default=1)
     return parser
 
 
