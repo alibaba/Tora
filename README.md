@@ -2,7 +2,7 @@
 
 <img src="sat/assets/icon/icon.jpg" width="250"/>
 
-<h2><center>Tora: Trajectory-oriented Diffusion Transformer for Video Generation</h2>
+<h2><center>[🔥CVPR'25]Tora: Trajectory-oriented Diffusion Transformer for Video Generation</h2>
 
 Zhenghao Zhang\*, Junchao Liao\*, Menghao Li, Zuozhuo Dai, Bingxue Qiu, Siyu Zhu, Long Qin, Weizhi Wang
 
