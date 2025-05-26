@@ -32,6 +32,7 @@ Recent advancements in Diffusion Transformer (DiT) have demonstrated remarkable 
 
 ## 📣 Updates
 
+- `2025/05/24` We open-sourced a LoRA-finetuned model of [Wan](https://github.com/Wan-Video/Wan2.1). It turns things in the image into fluffy toys. Check this out: https://github.com/alibaba/wan-toy-transform
 - `2025/01/06` 🔥🔥We released Tora Image-to-Video, including inference code and model weights.
 - `2024/12/13` SageAttention2 and model compilation are supported in diffusers version. Tested on the A10, these approaches speed up every inference step by approximately 52%, except for the first step.
 - `2024/12/09` 🔥🔥Diffusers version of Tora and the corresponding model weights are released. Inference VRAM requirements are reduced to around 5 GiB. Please refer to [this](diffusers-version/README.md) for details.
