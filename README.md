@@ -271,13 +271,11 @@ Special thanks to the contributors of these libraries for their hard work and de
 ## 📚 Citation
 
 ```bibtex
-@misc{zhang2024toratrajectoryorienteddiffusiontransformer,
-      title={Tora: Trajectory-oriented Diffusion Transformer for Video Generation},
-      author={Zhenghao Zhang and Junchao Liao and Menghao Li and Zuozhuo Dai and Bingxue Qiu and Siyu Zhu and Long Qin and Weizhi Wang},
-      year={2024},
-      eprint={2407.21705},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2407.21705},
+@inproceedings{zhang2025tora,
+  title={Tora: Trajectory-oriented diffusion transformer for video generation},
+  author={Zhang, Zhenghao and Liao, Junchao and Li, Menghao and Dai, Zuozhuo and Qiu, Bingxue and Zhu, Siyu and Qin, Long and Wang, Weizhi},
+  booktitle={Proceedings of the Computer Vision and Pattern Recognition Conference},
+  pages={2063--2073},
+  year={2025}
 }
 ```
